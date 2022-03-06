@@ -2,8 +2,12 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:dictionary_app/detaySayfa.dart';
 import 'package:dictionary_app/kelimeler.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+
+void main () async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -32,7 +36,7 @@ class _AnasayfaState extends State<Anasayfa> {
   bool aramaYapiliyorMu = false;
   String aramaKelimesi = "";
 
-  var refKelimeler = FirebaseDatabase.instance.reference().child("kelimeler");
+  var refKelimeler = FirebaseDatabase.instance.ref().child("kelimeler");
 
   @override
   Widget build(BuildContext context) {
@@ -70,13 +74,13 @@ class _AnasayfaState extends State<Anasayfa> {
           ),
         ],
       ),
-      body: StreamBuilder<Event>(
+      body: StreamBuilder<DatabaseEvent>(
         stream: refKelimeler.onValue, // Transfer immediately when there is a change in the interface
         builder: (context,event){
           if(event.hasData){
-            var kelimelerListesi = List<Kelimeler>.empty(growable: true);
+            var kelimelerListesi = List<Kelimeler>.empty(growable: true); // or <Kelimeler>[];
 
-            var gelenDegerler = (event.data! as Event).snapshot.value; // Transfer all streamed data here
+            var gelenDegerler = event.data!.snapshot.value as dynamic; // Transfer all streamed data here
 
             if(gelenDegerler != null){
               gelenDegerler.forEach((key,object){ // object are {"ingilizce","kelime_id","turkce"}
